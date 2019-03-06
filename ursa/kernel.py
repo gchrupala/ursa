@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import Sequence, List, Any, Union, TypeVar, Iterable
+from typing import Sequence,  Union, List, Iterable
 from typing_extensions import Protocol
 
 class Labeled(Protocol):
