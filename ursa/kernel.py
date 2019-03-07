@@ -65,5 +65,5 @@ class Kernel:
         return N
 
 def product(xs: Iterable[float]) -> float:
-    return reduce(lambda a, b: a*b, xs)
+    return reduce(lambda a, b: a*b, xs, 1)
 
