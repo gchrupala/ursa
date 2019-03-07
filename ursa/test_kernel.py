@@ -34,9 +34,12 @@ def test_ignore_terminals():
     K = Kernel(ignore_terminals=False)
     assert K(trees[0][1], trees[1][1]) == 0.0
 
-def test_alpha():
+@given(t1=tree, t2=tree)    
+def test_alpha(t1, t2):
     K = Kernel()
-    assert K(trees[0], trees[1], alpha=0.5) < K(trees[0], trees[1], alpha=1.0)
+    k_half = K(t1, t2, alpha=0.5)
+    k_one  = K(t1, t2, alpha=1.0)
+    assert k_half == 0.0 and k_one == 0.0 or k_half < k_one
 
 @given(t1=tree, t2=tree)
 def test_normalize(t1, t2):
