@@ -36,9 +36,8 @@ def test_ignore_terminals():
 
 @given(t1=tree, t2=tree)    
 def test_alpha(t1, t2):
-    K = Kernel()
-    k_half = K(t1, t2, alpha=0.5)
-    k_one  = K(t1, t2, alpha=1.0)
+    k_half = Kernel(alpha=0.5)(t1, t2)
+    k_one  = Kernel(alpha=1.0)(t1, t2)
     assert k_half == 0.0 and k_one == 0.0 or k_half < k_one
 
 @given(t1=tree, t2=tree)
