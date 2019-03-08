@@ -19,7 +19,13 @@ def pearsonr(x, y, axis=0):
      w2 = norm(x2, 2, axis=axis) 
      return w12 / (w1 * w2)
 
-def pairwise(f, data1, data2=None, normalize=False, dtype=np.float64):
+def pairwise(f, data1, data2=None, parallel=False, **kwargs):
+    if parallel:
+        return _pairwise_parallel(f, data1, data2, **kwargs)
+    else:
+        return _pairwise(f, data1, data2, **kwargs)
+
+def _pairwise(f, data1, data2=None, normalize=False, dtype=np.float64):
     """Compute matrix of values of function f applied to elements of data1 and data2."""
     symmetric = False
     if data2 is None:
@@ -38,7 +44,7 @@ def pairwise(f, data1, data2=None, normalize=False, dtype=np.float64):
                 M[i, j] = f(d1, d2) / denom
     return M
 
-def pairwise_parallel(f, data1, data2=None, normalize=False,  backend="loky", n_jobs=-1, dtype=np.float64):
+def _pairwise_parallel(f, data1, data2=None, normalize=False,  backend="loky", n_jobs=-1, dtype=np.float64):
     """Compute matrix of values of function f applied to elements of data1 and data2."""
     from joblib import Parallel, delayed
     symmetric = False

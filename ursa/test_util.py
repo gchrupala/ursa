@@ -36,6 +36,6 @@ def _test_pairwise_symmetric(data):
 @given(data=arrays(np.float64, (2,3), elements=floats(allow_nan=False, allow_infinity=False)))
 def _test_pairwise_parallel(data):
     from scipy.spatial.distance import euclidean
-    M = U.pairwise(euclidean, data, normalize=False, dtype=np.float64)
-    L = U.pairwise_parallel(euclidean, data, normalize=False, dtype=np.float64)
+    M = U.pairwise(euclidean, data, normalize=False, dtype=np.float64, parallel=False)
+    L = U.pairwise(euclidean, data, normalize=False, dtype=np.float64, parallel=True)
     assert np.all(M == L)
