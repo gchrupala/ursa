@@ -7,7 +7,7 @@ def triu(x: np.ndarray) -> np.ndarray:
     ones  = np.ones_like(x)
     return x[np.triu(ones, k=1) == 1]
 
-def pearsonr(x, y, axis=0): 
+def pearson_r(x, y, axis=0): 
      """Returns Pearson's correlation coefficient. 
      Not usable when x or y are constant.
      """
