@@ -32,12 +32,24 @@ class Regress:
             result[name]['mean'] = mean[best] * scorer._sign
             result[name]['std']  = std[best]
             result[name]['alpha'] = self.grid['alpha'][best]
-        self.report = result
+        self._report = result
 
-    def fit_report(self, X, Y):
+    def fit_report(self, X, Y, as_df=False):
         self.fit(X, Y)
-        return self.report
-    
+        return self.report(as_df=False)
+
+    def report(self, as_df=False):
+        if as_df:
+            return as_dataframe(self._report)
+        else:
+            return self._report
+            
 def embed(X, ref, sim, parallel=True):
     return U.pairwise(sim, X, ref)
 
+def as_dataframe(report):
+    import pandas as pd
+    return pd.DataFrame(dict(metric = list(report.keys()),
+                             mean   = [ v['mean'] for v in report.values()],
+                             std    = [ v['std']  for v in report.values()],
+                             alpha  = [ v['alpha'] for v in report.values()]))
