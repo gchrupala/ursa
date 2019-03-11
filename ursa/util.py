@@ -33,7 +33,7 @@ def _pairwise(f, data1, data2=None, normalize=False, dtype=np.float64):
         symmetric = True
     M = np.zeros((len(data1), len(data2)), dtype=dtype)
     if normalize:
-        self1 = np.array([f(d, d) for d in data1], dtype=dtype, device=device)
+        self1 = np.array([f(d, d) for d in data1], dtype=dtype)
         self2 = self1 if symmetric else np.array([f(d, d) for d in data2], dtype=dtype)
     for i, d1 in enumerate(data1):
         for j, d2 in enumerate(data2):

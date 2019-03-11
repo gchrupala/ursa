@@ -1,6 +1,8 @@
 from functools import reduce
-from typing import Sequence,  Union, List, Iterable
+from typing import Sequence,  Union, Tuple, Dict, List, Iterable, Callable
 from typing_extensions import Protocol
+import ursa.util as U
+import numpy as np
 
 class Labeled(Protocol):
     def label(self) -> str: ...
@@ -26,7 +28,12 @@ def children(n: TreeLike) -> Sequence[TreeLike]:
 
 class Kernel:
     """Class to hold configuration of the kernel function."""
-    def __init__(self, label=label, leaf=leaf, children=children, alpha: float=1.0, ignore_terminals: bool=False):
+    def __init__(self,
+                 label: Callable[[Union[Labeled, str]], str]        =label,
+                 leaf: Callable[[TreeLike], bool]                   =leaf,
+                 children: Callable[[TreeLike], Sequence[TreeLike]] =children,
+                 alpha: float                                       =1.0,
+                 ignore_terminals: bool                             =False):
         self.label = label
         self.leaf = leaf
         self.children = children
@@ -46,9 +53,9 @@ class Kernel:
         """Returns True if node t is a pre-terminal."""
         return all((self.leaf(c) for c in self.children(t)))
     
-    def production(self, t: TreeLike) -> List[str]:
+    def production(self, t: TreeLike) -> tuple:
         """Returns the productiona at node t, i.e. the list of children's labels."""
-        return [ self.label(c) for c in self.children(t) ]
+        return tuple(self.label(c) for c in self.children(t))
 
     def C(self, n1: TreeLike, n2: TreeLike) -> float:
         # both nodes are preterminals and have same productions
@@ -60,11 +67,50 @@ class Kernel:
         else:
             return 0
 
-    def __call__(self, t1: TreeLike, t2: TreeLike):
+    def __call__(self, t1: TreeLike, t2: TreeLike) -> float:
         """Returns the number of shared tree fragments between trees t1 and t2, discounted by alpha."""
         N = sum(self.C(n1, n2) for n1 in self.subtrees(t1) for n2 in self.subtrees(t2))
         return N
 
+    def ftk(self, nodes1: Dict[tuple, List[TreeLike]] , nodes2: Dict[tuple, List[TreeLike]]) -> float:
+        """Returns the number of shared tree fragments between nodemaps nodes1
+        and nodes2, discounted by alpha.  Algorithm adapted from:
+        Moschitti, A. (2006). Making tree kernels practical for
+        natural language learning. In 11th conference of the European
+        Chapter of the Association for Computational
+        Linguistics. http://www.aclweb.org/anthology/E06-1015
+        """
+        
+        ks1 = nodes1.keys()
+        ks2 = nodes2.keys()
+        N = sum(self.C(n1, n2)
+                for k in set(ks1).union(ks2)
+                  for n1 in nodes1.get(k, [])
+                    for n2 in nodes2.get(k, []))
+        return N
+
+    def pairwise(self, trees1, trees2=None,  normalize=False, dtype=np.float64):
+        """Returns the value of the tree kernel between sequence of trees trees1 and trees2, 
+        using the Fast Tree Kernel algorithm of of Moschitti, A. (2006). 
+        """
+        nodes1 = [ self.nodemap(t) for t in trees1 ]
+        if trees2 is not None:
+            nodes2 = [ self.nodemap(t) for t in trees2 ]
+        else:
+            nodes2 = None
+        # For some reason this doesn't parallelize well: we'll call the sequential version of U.pairwise
+        return U.pairwise(self.ftk, nodes1, data2=nodes2, normalize=normalize, dtype=dtype, parallel=False)
+    
+    def nodemap(self, t: TreeLike) -> Dict[tuple, List[TreeLike]]:
+        """Returns the map from productions to lists of nodes for given tree t."""
+        M: Dict[tuple, List[TreeLike]] = {}
+        for n in self.subtrees(t):
+            p = self.production(n)
+            if p in M:
+                M[p].append(n)
+            else:
+                M[p] = [n]
+        return M
+    
 def product(xs: Iterable[float]) -> float:
     return reduce(lambda a, b: a*b, xs, 1.0)
-

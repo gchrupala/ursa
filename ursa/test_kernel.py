@@ -1,8 +1,10 @@
 from ursa.kernel import Kernel
+import ursa.util as U
 from nltk.tree import Tree
-from hypothesis.strategies import builds, text, recursive, lists
+from hypothesis.strategies import builds, text, recursive, lists, booleans
 from hypothesis import given
 from string import ascii_letters
+import numpy as np
 
 examples = [ "(NP (D a) (N dog))",
              "(NP (D the) (N cat))",
@@ -45,3 +47,18 @@ def test_normalize(t1, t2):
     K = Kernel()
     k = K(t1, t2) / (K(t1, t1) * K(t2, t2))**0.5
     assert k >= 0.0 and k <= 1.0
+
+@given(t1=tree, t2=tree)
+def test_ftk(t1, t2):
+    K = Kernel()
+    n_ftk = K.ftk(K.nodemap(t1), K.nodemap(t2))
+    n_naive = K(t1, t2)
+    assert n_ftk == n_naive
+    
+@given(trees=lists(elements=tree), normalize=booleans())
+def test_pairwise_ftk(trees, normalize):
+    K = Kernel()
+    M_naive = U.pairwise(K, trees, parallel=False, normalize=normalize)
+    M_ftk   = K.pairwise(trees, normalize=normalize)
+    assert np.allclose(M_naive, M_ftk)
+    
