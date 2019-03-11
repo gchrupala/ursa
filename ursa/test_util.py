@@ -10,17 +10,17 @@ def test_triu():
     x = np.array(np.arange(9)).reshape((3,3))
     assert np.all(U.triu(x) == np.array([1,2,5]))
     
-def test_pearsonr_unit():
+def test_pearson_r_unit():
     x = np.arange(5)
     a = 2.0
     b = -3.0
-    assert np.allclose(U.pearsonr(x, x), 1.0)
-    assert np.allclose(U.pearsonr(x, x * a + b), 1.0)
+    assert np.allclose(U.pearson_r(x, x), 1.0)
+    assert np.allclose(U.pearson_r(x, x * a + b), 1.0)
     
 def test_pearsonr_symmetric():
     x = np.arange(3*4).reshape((3,4))
     y = np.arange(10,10+3*4).reshape((3,4))
-    assert np.allclose(U.pearsonr(x, y), U.pearsonr(y, x))
+    assert np.allclose(U.pearson_r(x, y), U.pearson_r(y, x))
 
 @given(data=arrays(np.float64, (2,3), elements=floats(-1e+300, 1e+300, allow_nan=False, allow_infinity=False)))
 def test_pairwise_diagonal(data):

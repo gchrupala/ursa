@@ -13,7 +13,7 @@ class Regress:
 
     default_alphas = [ 10**n for n in range(-3, 2) ]
     metrics = dict(mse       = make_scorer(mean_squared_error, greater_is_better=False),
-                   r2        =  make_scorer(r2_score, greater_is_better=True),
+                   r2        = make_scorer(r2_score, greater_is_better=True),
                    pearson_r = make_scorer(pearson_r_score, greater_is_better=True))
                    
     
@@ -34,20 +34,17 @@ class Regress:
             result[name]['alpha'] = self.grid['alpha'][best]
         self._report = result
 
-    def fit_report(self, X, Y, as_df=False):
+    def fit_report(self, X, Y):
         self.fit(X, Y)
-        return self.report(as_df=False)
+        return self.report()
 
-    def report(self, as_df=False):
-        if as_df:
-            return as_dataframe(self._report)
-        else:
-            return self._report
+    def report(self):
+        return self._report
             
 def embed(X, ref, sim, parallel=True):
     return U.pairwise(sim, X, ref)
 
-def as_dataframe(report):
+def dataframe(report):
     import pandas as pd
     return pd.DataFrame(dict(metric = list(report.keys()),
                              mean   = [ v['mean'] for v in report.values()],
