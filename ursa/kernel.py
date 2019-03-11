@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import Sequence,  Union, Tuple, Dict, List, Iterable, Callable
+from typing import Sequence, Union, Tuple, Dict, List, Iterable, Callable, Optional
 from typing_extensions import Protocol
 import ursa.util as U
 import numpy as np
@@ -89,13 +89,17 @@ class Kernel:
                     for n2 in nodes2.get(k, []))
         return N
 
-    def pairwise(self, trees1, trees2=None,  normalize=False, dtype=np.float64):
-        """Returns the value of the tree kernel between sequence of trees trees1 and trees2, 
-        using the Fast Tree Kernel algorithm of of Moschitti, A. (2006). 
+    def pairwise(self,
+                 trees1: Sequence[TreeLike],
+                 trees2: Optional[Sequence[TreeLike]]=None,
+                 normalize: bool=False,
+                 dtype: type=np.float64):
+        """Returns the value of the tree kernel between sequence of trees1 and trees2, 
+        using the Fast Tree Kernel algorithm of Moschitti, A. (2006). 
         """
         nodes1 = [ self.nodemap(t) for t in trees1 ]
         if trees2 is not None:
-            nodes2 = [ self.nodemap(t) for t in trees2 ]
+            nodes2: Optional[List[Dict[tuple, List[TreeLike]]]] = [ self.nodemap(t) for t in trees2 ]
         else:
             nodes2 = None
         # For some reason this doesn't parallelize well: we'll call the sequential version of U.pairwise
