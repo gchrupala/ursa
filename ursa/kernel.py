@@ -44,7 +44,7 @@ class Kernel:
 
     def preterm(self, t: TreeLike) -> bool:
         """Returns True if node t is a pre-terminal."""
-        return len(self.children(t)) == 1 and self.leaf(self.children(t)[0])
+        return all((self.leaf(c) for c in self.children(t)))
     
     def production(self, t: TreeLike) -> List[str]:
         """Returns the productiona at node t, i.e. the list of children's labels."""
