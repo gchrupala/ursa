@@ -42,7 +42,7 @@ class Kernel:
 
     def subtrees(self, t: TreeLike) -> Iterable[TreeLike]:
         """Yields all subtrees of a tree t."""
-        if leaf(t):
+        if self.leaf(t):
             pass
         else:
             yield t

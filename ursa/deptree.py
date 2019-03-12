@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 
 def label(n: C.TokenTree) -> str:
-    return n.token['upostag']
+    return n.token['deprel']
 
 def leaf(n: C.TokenTree) -> bool:
     return len(n.children) == 0

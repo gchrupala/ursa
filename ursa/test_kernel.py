@@ -1,10 +1,12 @@
 from ursa.kernel import Kernel
+import ursa.deptree as DT
 import ursa.util as U
 from nltk.tree import Tree
 from hypothesis.strategies import builds, text, recursive, lists, booleans
 from hypothesis import given
 from string import ascii_letters
 import numpy as np
+import conllu
 
 examples = [ "(NP (D a) (N dog))",
              "(NP (D the) (N cat))",
@@ -61,4 +63,24 @@ def test_pairwise_ftk(trees, normalize):
     M_naive = U.pairwise(K, trees, parallel=False, normalize=normalize)
     M_ftk   = K.pairwise(trees, normalize=normalize)
     assert np.allclose(M_naive, M_ftk)
+    
+def test_deptree():
+    data = """# text = the cat chases the mouse
+1   The     the    DET    DT   Definite=Def|PronType=Art   4   det     _   _
+4   cat     cat    NOUN   NN   Number=Sing                 5   nsubj   _   _
+5   chases   chase   VERB   VBZ  Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin   0   root    _   _
+7   the     the    DET    DT   Definite=Def|PronType=Art   9   det     _   _
+9   mouse    mouse    NOUN   NN   Number=Sing                 5   dobj    _   SpaceAfter=No
+
+# text = the cat sleeps
+1   The     the    DET    DT   Definite=Def|PronType=Art   4   det     _   _
+4   cat     cat    NOUN   NN   Number=Sing                 5   nsubj   _   _
+5   sleeps   sleep   VERB   VBZ  Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin   0   root    _   _
+"""
+    examples = conllu.parse_tree(data)
+    kernel = Kernel(label=DT.label, leaf=DT.leaf, children=DT.children)
+    assert kernel(examples[1], examples[1]) == 3.0
+    kernel_0 = Kernel()
+    tree = Tree.fromstring("(root (nsubj det) (dobj det))")
+    assert kernel_0(tree, tree) == kernel(examples[0], examples[0])
     
