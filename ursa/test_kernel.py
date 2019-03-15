@@ -29,14 +29,6 @@ def test_self_NP():
     K = Kernel()
     assert K(trees[0], trees[0]) == 6.0
     assert K(trees[0], trees[1]) < 6.0    
-    K = Kernel(ignore_terminals=True)
-    assert K(trees[0], trees[1]) == 6.0
-
-def test_ignore_terminals():
-    K = Kernel(ignore_terminals=True)
-    assert K(trees[0][1], trees[1][1]) == 1.0
-    K = Kernel(ignore_terminals=False)
-    assert K(trees[0][1], trees[1][1]) == 0.0
 
 @given(t1=tree, t2=tree)    
 def test_alpha(t1, t2):

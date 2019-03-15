@@ -33,7 +33,6 @@ class Kernel:
         self.label = label
         self.children = children
         self.alpha = alpha
-        self.ignore_terminals = ignore_terminals
 
     def leaf(self, t: TreeLike) -> bool:
         return len(self.children(t)) == 0
@@ -57,7 +56,7 @@ class Kernel:
 
     def C(self, n1: TreeLike, n2: TreeLike) -> float:
         # both nodes are preterminals and have same productions
-        if self.preterm(n1) and self.preterm(n2) and self.label(n1) == self.label(n2) and (self.production(n1) == self.production(n2) or self.ignore_terminals):
+        if self.preterm(n1) and self.preterm(n2) and self.label(n1) == self.label(n2) and (self.production(n1) == self.production(n2)):
             return self.alpha
         # both nodes are non-terminals and have same productions
         elif not self.preterm(n1) and not self.preterm(n2) and self.label(n1) == self.label(n2) and self.production(n1) == self.production(n2):
