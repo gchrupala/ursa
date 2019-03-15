@@ -15,7 +15,7 @@ trees = [Tree.fromstring(e) for e in examples ]
 
 tree =recursive(text(ascii_letters), 
                 lambda children:  builds(Tree, text(ascii_letters), 
-                                         lists(elements=children))).filter(lambda t: not isinstance(t, str))
+                                         lists(elements=children))).filter(lambda t: not isinstance(t, str) and len(t[:]) > 0 )
 @given(t1=tree, t2=tree)
 def test_symmetric(t1, t2):
     K = Kernel()
@@ -78,7 +78,7 @@ def test_deptree():
 5   sleeps   sleep   VERB   VBZ  Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin   0   root    _   _
 """
     examples = conllu.parse_tree(data)
-    kernel = Kernel(label=DT.label, leaf=DT.leaf, children=DT.children)
+    kernel = Kernel(label=DT.label, children=DT.children)
     assert kernel(examples[1], examples[1]) == 3.0
     kernel_0 = Kernel()
     tree = Tree.fromstring("(root (nsubj det) (dobj det))")

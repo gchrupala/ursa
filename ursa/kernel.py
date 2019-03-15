@@ -17,9 +17,6 @@ def label(n: Union[Labeled, str]) -> str:
     else:
         return n.label()
 
-def leaf(n: TreeLike) -> bool:
-    return isinstance(n, str)
-
 def children(n: TreeLike) -> Sequence[TreeLike]:
     if isinstance(n, str):
         return []
@@ -30,16 +27,17 @@ class Kernel:
     """Class to hold configuration of the kernel function."""
     def __init__(self,
                  label: Callable[[Union[Labeled, str]], str]        =label,
-                 leaf: Callable[[TreeLike], bool]                   =leaf,
                  children: Callable[[TreeLike], Sequence[TreeLike]] =children,
                  alpha: float                                       =1.0,
                  ignore_terminals: bool                             =False):
         self.label = label
-        self.leaf = leaf
         self.children = children
         self.alpha = alpha
         self.ignore_terminals = ignore_terminals
 
+    def leaf(self, t: TreeLike) -> bool:
+        return len(self.children(t)) == 0
+    
     def subtrees(self, t: TreeLike) -> Iterable[TreeLike]:
         """Yields all subtrees of a tree t."""
         if self.leaf(t):
