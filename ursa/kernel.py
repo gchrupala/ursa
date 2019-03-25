@@ -28,8 +28,7 @@ class Kernel:
     def __init__(self,
                  label: Callable[[Union[Labeled, str]], str]        =label,
                  children: Callable[[TreeLike], Sequence[TreeLike]] =children,
-                 alpha: float                                       =1.0,
-                 ignore_terminals: bool                             =False):
+                 alpha: float                                       =1.0):
         self.label = label
         self.children = children
         self.alpha = alpha
