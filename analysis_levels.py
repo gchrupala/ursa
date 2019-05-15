@@ -28,7 +28,7 @@ def edit_similarity_mean_pool():
                U.pearson_r(U.triu(avg_pool_sim), U.triu(edit_sim)),
                reg.report()['pearson_r']['mean'])
          
-def learned_similarity(epochs=1, device='cpu'):
+def weighted_average(epochs=1, device='cpu', factor=1):
     stackdata = np.load("../talkie/state_stack_flickr8k_val.npy")
     trans = np.load("../talkie/transcription_flickr8k_val.npy")
     trans_val = trans[500:]
@@ -40,7 +40,8 @@ def learned_similarity(epochs=1, device='cpu'):
         stack_val = stack[500:]
         stack = stack[:500]
 
-        wa = S.WeightedAverage(1024).to(device)
+        wa = S.WeightedAverage(1024, 1024//factor).to(device)
+        print(wa)
         optim = torch.optim.Adam(wa.parameters())
         minloss = 0; minepoch = None
         print("layer epoch train_loss val_loss")
@@ -62,4 +63,38 @@ def learned_similarity(epochs=1, device='cpu'):
         print("Maximum correlation on val: {} at epoch {}".format(-minloss, minepoch))
         
         
+def learned_similarity(epochs=1, device='cpu'):
+    stackdata = np.load("../talkie/state_stack_flickr8k_val.npy")
+    trans = np.load("../talkie/transcription_flickr8k_val.npy")
+    trans_val = trans[500:]
+    trans = trans[:500]    
+    edit_sim = torch.tensor(U.pairwise(S.stringsim, trans)).float().to(device)
+    edit_sim_val = torch.tensor(U.pairwise(S.stringsim, trans_val)).float().to(device)
+    for layer in range(4):
+        stack = [ torch.tensor(item[:, layer, :]).float().to(device) for (i,item) in enumerate(stackdata) ]
+        stack_val = stack[500:]
+        stack = stack[:500]
+        model = S.LearnedSimilarity(1024).to(device)
+        print(model)
+        optim = torch.optim.Adam(model.parameters())
+        minloss = 0; minepoch = None
+        print("layer epoch train_loss val_loss")
+        for epoch in range(epochs):
+            sim = torch.cat([ model(u, v) for (i, u) in enumerate(stack) for (j, v) in enumerate(stack) if i < j ])
+            print(sim.size())
+            sim_val = torch.cat([ model(u, v) for (i, u) in enumerate(stack) for (j, v) in enumerate(stack_val) if i < j ])
+            
+            loss = -S.pearson_r(sim, S.triu(edit_sim))
+            loss_val = -S.pearson_r(sim_val, S.triu(edit_sim_val))
+            print(layer, epoch, -loss.item(), -loss_val.item())
+            if loss_val.item() <= minloss:
+                minloss = loss_val.item()
+                minepoch = epoch
+            optim.zero_grad()
+            loss.backward()
+            optim.step()
+        print("Maximum correlation on val: {} at epoch {}".format(-minloss, minepoch))
         
+        
+        
+
