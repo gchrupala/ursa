@@ -5,14 +5,17 @@ import Levenshtein as L
 
 class LearnedSimilarity(nn.Module):
 
-    def __init__(self, sim=nn.CosineSimilarity()):
+    def __init__(self, size_in):
         super(LearnedSimilarity, self).__init__()
-        self.WA = WeightedAverage()
-        self.sim=sim
+        self.size_in = size_in
+        self.W = nn.Linear(self.size_in, self.size_in)
+        
 
     def forward(self, u, v):
-        return self.sim(self.WA(u), self.WA(v))
-
+        score = u @ self.W(v).t()
+        alpha = torch.softmax(score.view(-1), dim=0).view(score.size())
+        sim = cosine_matrix(u, v)
+        return (alpha * sim).sum()
 
 class WeightedAverage(nn.Module):
     """Parameterized weighted average of a sequence of vectors.
@@ -28,7 +31,7 @@ class WeightedAverage(nn.Module):
         self.W2 = nn.Linear(self.size, 1)
 
     def forward(self, h):
-        alpha = F.softmax(self.W2(self.activation(self.W1(h))), dim=1) 
+        alpha = F.softmax(self.W2(self.activation(self.W1(h))), dim=1)
         return (alpha.expand_as(h) * h).sum(dim=1)
 
 
@@ -41,6 +44,12 @@ def cosine_matrix(U, V):
     U_norm = U / U.norm(2, dim=1, keepdim=True)
     V_norm = V / V.norm(2, dim=1, keepdim=True)
     return U_norm @ V_norm.t()
+
+def cosine_matrix_batch(U, V): 
+     "Returns the matrix of cosine similarity between each dim row of U[i] and each row of V[i], batchwise" 
+     U_norm = U / U.norm(2, dim=2, keepdim=True) 
+     V_norm = V / V.norm(2, dim=2, keepdim=True) 
+     return U_norm @ V_norm.permute(0, 2, 1) 
 
 def pearson_r(x, y, dim=0, eps=1e-8):
     "Returns Pearson's correlation coefficient."
@@ -55,3 +64,11 @@ def triu(x):
     "Extracts upper triangular part of a matrix, excluding the diagonal."
     ones  = torch.ones_like(x.data)
     return x[torch.triu(ones, diagonal=1) == 1]
+
+def pairwise_concat(u, v):
+    # (torch.diag(torch.cat([two, y], dim=1)[0]) @ torch.diag(torch.cat([x, two], dim=1)[0])).diag()
+    v_ones = torch.cat([torch.ones_like(v), v], dim=1)
+    u_ones = torch.cat([u, torch.ones_like(u)], dim=1)
+    # make these guys into diagonal matrices now
+    # and run bmm on them somehow
+    
