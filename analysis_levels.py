@@ -35,17 +35,16 @@ def weighted_average(epochs=1, device='cpu', factor=1):
     trans = trans[:500]    
     edit_sim = torch.tensor(U.pairwise(S.stringsim, trans)).float().to(device)
     edit_sim_val = torch.tensor(U.pairwise(S.stringsim, trans_val)).float().to(device)
+    print("layer epoch train_loss val_loss")
     for layer in range(4):
         stack = [ torch.tensor([item[:, layer, :]]).float().to(device) for item in stackdata ]
         stack_val = stack[500:]
         stack = stack[:500]
 
         wa = S.WeightedAverage(1024, 1024//factor).to(device)
-        print(wa)
         optim = torch.optim.Adam(wa.parameters())
         minloss = 0; minepoch = None
-        print("layer epoch train_loss val_loss")
-        for epoch in range(epochs):
+        for epoch in range(1, 1+epochs):
             avg_pool = torch.cat([ wa(item) for item in stack])
             avg_pool_sim = S.cosine_matrix(avg_pool, avg_pool)
             avg_pool_val = torch.cat([ wa(item) for item in stack_val])
