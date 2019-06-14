@@ -17,7 +17,8 @@ setup(
         'pandas           ==  0.24.1',
         'pytest           ==  4.3.0',
         'decorator        ==  4.3.2',
-        'hypothesis       ==  4.7.19'
+        'hypothesis       ==  4.7.19',
+        'typing_extensions == 3.7.2'
         ]
 )
 
