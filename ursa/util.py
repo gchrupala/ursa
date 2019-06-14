@@ -7,9 +7,10 @@ def triu(x: np.ndarray) -> np.ndarray:
     ones  = np.ones_like(x)
     return x[np.triu(ones, k=1) == 1]
 
-def pearson_r(x, y, axis=0): 
+def pearson_r(x, y, axis=0, eps=1e-8): 
      """Returns Pearson's correlation coefficient. 
-     Not usable when x or y are constant.
+     When eps is a small number, this function will return a non-nan value
+     even if x or y is constant.
      """
      from numpy.linalg import norm 
      x1 = x - x.mean(axis=axis) 
@@ -17,7 +18,7 @@ def pearson_r(x, y, axis=0):
      w12 = np.sum(x1*x2, axis=axis) 
      w1 = norm(x1, 2, axis=axis) 
      w2 = norm(x2, 2, axis=axis) 
-     return w12 / (w1 * w2)
+     return w12 / np.maximum(eps, (w1 * w2))
 
 def pairwise(f, data1, data2=None, parallel=False, **kwargs):
     if parallel:
@@ -36,6 +37,7 @@ def _pairwise(f, data1, data2=None, normalize=False, dtype=np.float64):
         self1 = np.array([f(d, d) for d in data1], dtype=dtype)
         self2 = self1 if symmetric else np.array([f(d, d) for d in data2], dtype=dtype)
     for i, d1 in enumerate(data1):
+        print("Completed row {}".format(i))
         for j, d2 in enumerate(data2):
             denom = (self1[i] * self2[j])**0.5 if normalize else 1.0
             if symmetric and i > j: # No need to re-compute lower triangular
