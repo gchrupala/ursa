@@ -23,6 +23,13 @@ def children(n: TreeLike) -> Sequence[TreeLike]:
     else:
         return n[:]
 
+def delex(n, leaf=""):
+    from nltk.tree import Tree
+    if isinstance(n, str): 
+        return leaf 
+    else: 
+        return Tree(n.label(), [ delex(c) for c in n[:] ])
+
 class Kernel:
     """Class to hold configuration of the kernel function."""
     def __init__(self,
@@ -47,7 +54,8 @@ class Kernel:
 
     def preterm(self, t: TreeLike) -> bool:
         """Returns True if node t is a pre-terminal."""
-        return all((self.leaf(c) for c in self.children(t)))
+        return not(self.leaf(t)) and all((self.leaf(c) for c in self.children(t)))
+        
     
     def production(self, t: TreeLike) -> tuple:
         """Returns the productiona at node t, i.e. the list of children's labels."""
