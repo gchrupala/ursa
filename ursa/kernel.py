@@ -66,7 +66,8 @@ class Kernel:
         if self.preterm(n1) and self.preterm(n2) and self.label(n1) == self.label(n2) and (self.production(n1) == self.production(n2)):
             return self.alpha
         # both nodes are non-terminals and have same productions
-        elif not self.preterm(n1) and not self.preterm(n2) and self.label(n1) == self.label(n2) and self.production(n1) == self.production(n2):
+        elif not self.preterm(n1) and not self.preterm(n2) and not self.leaf(n1) and not self.leaf(n2) \
+             and self.label(n1) == self.label(n2) and self.production(n1) == self.production(n2):
             return self.alpha * product(1 + self.C(self.children(n1)[i], self.children(n2)[i]) for i in range(len(self.children(n1))))
         else:
             return 0

@@ -37,7 +37,7 @@ def _pairwise(f, data1, data2=None, normalize=False, dtype=np.float64):
         self1 = np.array([f(d, d) for d in data1], dtype=dtype)
         self2 = self1 if symmetric else np.array([f(d, d) for d in data2], dtype=dtype)
     for i, d1 in enumerate(data1):
-        print("Completed row {}".format(i))
+        #print("Completed row {}".format(i))
         for j, d2 in enumerate(data2):
             denom = (self1[i] * self2[j])**0.5 if normalize else 1.0
             if symmetric and i > j: # No need to re-compute lower triangular
