@@ -12,7 +12,8 @@ setup(
         'conllu',
         'nltk',
         'numpy',
-        'pandas'
+        'pandas',
+        'Levenshtein'
         ]
 )
 
