@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name='ursa',
-    version='0.3.0',
+    version='0.3.1',
     url='https://github.com/gchrupala/ursa',
     packages=['ursa'],
     license='Apache License 2.0',
