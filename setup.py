@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 setup(
     name='ursa',
     version='0.3.0',
@@ -6,6 +6,7 @@ setup(
     packages=['ursa'],
     license='Apache License 2.0',
     description='Neural representation analysis with representational similarity',
+    packages=find_packages(exclude='test'),
     install_requires = [
         'scikit-learn',
         'scipy',
