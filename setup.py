@@ -13,7 +13,7 @@ setup(
         'nltk',
         'numpy',
         'pandas',
-        'Levenshtein'
+        'python-Levenshtein'
         ]
 )
 
