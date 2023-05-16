@@ -20,7 +20,7 @@ class Regress:
     def __init__(self, cv=10, alphas=default_alphas):
         self.cv = cv
         self.grid =  {'alpha': alphas }
-        self._model = GridSearchCV(Ridge(), self.grid, scoring=self.metrics, cv=self.cv, return_train_score=False, refit=False, iid=False)
+        self._model = GridSearchCV(Ridge(), self.grid, scoring=self.metrics, cv=self.cv, return_train_score=False, refit=False)
 
     def fit(self, X, Y):
         self._model.fit(X, Y)
